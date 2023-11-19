@@ -1,0 +1,42 @@
+---
+- name: Install Nginx package
+  hosts: nginx
+  become: true
+  vars:
+    nginx_listen_port: 8080
+
+  tasks:
+    - name: Install Epel Repo package from standart Repo
+      yum:
+        name: epel-release
+        state: latest
+      tags:
+        -epel-package
+        -packages
+
+    - name: Install Nginx package from EPEL Repo
+      yum:
+        name: nginx
+        state: latest
+      tags:
+        -nginx-package
+        -packages
+
+    - name: Nginx make config from template
+      template:
+        src: nginx.conf.j2
+        dest: /etc/nginx/nginx.conf
+      tags:
+        -nginx-config
+
+  handlers:
+    - name: restart nginx
+      systemd:
+        name: nginx
+        state: restarted
+        enabled: yes
+    
+    - name: reload nginx
+      systemd:
+        name: nginx
+        state: reloaded
